@@ -38,14 +38,17 @@ export default function RootLayout({
               </span>
             </Link>
             <div className="flex gap-5 text-sm flex-wrap justify-end">
-              <Link href="/map" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
-                War Map
+              <Link href="/warbands/build" className="text-[#c8a96e] hover:text-[#d4b87a] transition-colors uppercase tracking-wider font-bold">
+                Build Warband
               </Link>
-              <Link href="/world-map" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
-                World Map
+              <Link href="/warbands" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
+                Warbands
               </Link>
               <Link href="/factions" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
                 Factions
+              </Link>
+              <Link href="/map" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
+                War Map
               </Link>
               <Link href="/submit" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
                 Submit Battle
@@ -55,9 +58,6 @@ export default function RootLayout({
               </Link>
               <Link href="/frontline" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
                 Frontline
-              </Link>
-              <Link href="/warbands" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
-                Warbands
               </Link>
               <Link href="/about" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
                 About

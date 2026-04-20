@@ -7,6 +7,37 @@ datasource db {
   provider = "sqlite"
 }
 
+model User {
+  id           Int            @id @default(autoincrement())
+  username     String         @unique
+  email        String         @unique
+  passwordHash String         @map("password_hash")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  warbands     SavedWarband[]
+
+  @@map("users")
+}
+
+model SavedWarband {
+  id          Int      @id @default(autoincrement())
+  userId      Int?     @map("user_id")
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name        String
+  faction     String
+  subfaction  String?
+  notes       String?
+  isPublic    Boolean  @default(true) @map("is_public")
+  totalDucats Int      @default(0) @map("total_ducats")
+  totalGlory  Int      @default(0) @map("total_glory")
+  rosterJson  Json     @map("roster_json")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  reports1    BattleReport[] @relation("warband1")
+  reports2    BattleReport[] @relation("warband2")
+
+  @@map("saved_warbands")
+}
+
 model Sector {
   id            Int                @id @default(autoincrement())
   name          String
@@ -56,6 +87,10 @@ model BattleReport {
   generatedNarrative String?           @map("generated_narrative")
   linkedSubmissionId Int?              @unique @map("linked_submission_id")
   linkedSubmission   BattleSubmission? @relation(fields: [linkedSubmissionId], references: [id])
+  warband1Id         Int?              @map("warband1_id")
+  warband1           SavedWarband?     @relation("warband1", fields: [warband1Id], references: [id], onDelete: SetNull)
+  warband2Id         Int?              @map("warband2_id")
+  warband2           SavedWarband?     @relation("warband2", fields: [warband2Id], references: [id], onDelete: SetNull)
 
   @@map("battle_reports")
 }
