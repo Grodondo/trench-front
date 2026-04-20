@@ -34,30 +34,56 @@ export default async function MapPage() {
     // DB not ready
   }
 
+  const totalSectors = sectors.length;
   const faithfulCount = sectors.filter((s) => s.controller === "FAITHFUL").length;
   const infernalCount = sectors.filter((s) => s.controller === "INFERNAL").length;
   const contestedCount = sectors.filter((s) => s.controller === "CONTESTED").length;
 
+  const faithPct = totalSectors > 0 ? Math.round((faithfulCount / totalSectors) * 100) : 0;
+  const infernalPct = totalSectors > 0 ? Math.round((infernalCount / totalSectors) * 100) : 0;
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-serif font-bold text-[#c8a96e] tracking-wider mb-2">
+      <div className="text-center mb-10">
+        <h1 className="text-4xl font-serif font-bold text-[#c8a96e] tracking-wider mb-1">
           THE FRONT LINE
         </h1>
-        <p className="text-[#4a3728] text-sm uppercase tracking-[0.3em]">
-          Sector Control — Updated Daily
+        <p className="text-[#4a3728] text-xs uppercase tracking-[0.3em] mb-8">
+          Sector Control — Updated with every battle
         </p>
-        <div className="flex justify-center gap-8 mt-4 text-sm">
-          <span className="text-[#c8a96e]">
-            Faithful: <strong>{faithfulCount}</strong>
-          </span>
-          <span className="text-[#ff4444]">
-            Infernal: <strong>{infernalCount}</strong>
-          </span>
-          <span className="text-[#e8d5b0]/50">
-            Contested: <strong>{contestedCount}</strong>
-          </span>
-        </div>
+
+        {totalSectors > 0 && (
+          <div className="max-w-lg mx-auto">
+            {/* Control bar */}
+            <div className="h-2 w-full bg-[#2e1b0e] rounded-full overflow-hidden flex mb-3">
+              <div
+                style={{ width: `${faithPct}%` }}
+                className="bg-[#c8a96e]/80 transition-all duration-500"
+              />
+              <div
+                style={{ width: `${100 - faithPct - infernalPct}%` }}
+                className="bg-[#4a3728]/60"
+              />
+              <div
+                style={{ width: `${infernalPct}%` }}
+                className="bg-[#cc3333]/80 transition-all duration-500"
+              />
+            </div>
+            <div className="flex justify-between text-xs font-mono">
+              <span className="text-[#c8a96e]">
+                <span className="text-[#c8a96e]/50 uppercase tracking-widest mr-1">Faithful</span>
+                {faithfulCount} / {totalSectors}
+              </span>
+              <span className="text-[#4a3728]">
+                {contestedCount} contested
+              </span>
+              <span className="text-[#cc3333]">
+                {infernalCount} / {totalSectors}
+                <span className="text-[#cc3333]/50 uppercase tracking-widest ml-1">Infernal</span>
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       {sectors.length > 0 ? (

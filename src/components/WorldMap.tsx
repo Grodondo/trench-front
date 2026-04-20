@@ -101,13 +101,16 @@ function DetailPanel({ selected, onClose }: { selected: Selected; onClose: () =>
   );
 }
 
-function Chip({ active, onClick, color, children }: { active: boolean; onClick: () => void; color?: string; children: React.ReactNode }) {
+function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`px-2 py-1 text-[10px] font-mono uppercase tracking-wider rounded border transition-colors whitespace-nowrap ${active ? "border-current" : "border-[#2e1b0e] text-[#4a3728] hover:border-[#4a3728]"}`}
-      style={active && color ? { color, borderColor: color, background: `${color}18` } : undefined}
+      className={`px-2 py-1 text-[10px] font-mono uppercase tracking-wider rounded border transition-colors whitespace-nowrap ${
+        active
+          ? "border-[#c8a96e]/60 bg-[#c8a96e]/10 text-[#c8a96e]"
+          : "border-[#2e1b0e] text-[#4a3728] hover:border-[#4a3728] hover:text-[#c8a96e]/50"
+      }`}
     >
       {children}
     </button>
@@ -210,13 +213,13 @@ export default function WorldMapClient() {
       <div className="flex flex-wrap gap-x-4 gap-y-2 items-center bg-[#120a05] border border-[#2e1b0e] rounded-lg px-4 py-3">
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-mono uppercase tracking-widest text-[#c8a96e]/30">Layers</span>
-          <Chip active={showLocations} onClick={() => setShowLocations((v) => !v)} color="#3b82f6">Locations</Chip>
-          <Chip active={showEvents} onClick={() => setShowEvents((v) => !v)} color="#8b5cf6">Events</Chip>
+          <Chip active={showLocations} onClick={() => setShowLocations((v) => !v)}>Locations</Chip>
+          <Chip active={showEvents} onClick={() => setShowEvents((v) => !v)}>Events</Chip>
         </div>
         <div className="w-px h-4 bg-[#2e1b0e] hidden sm:block" />
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-mono uppercase tracking-widest text-[#c8a96e]/30">Side</span>
-          {ALL_SIDES.map((side) => { const c = LOCATION_SIDE_COLORS[side]; return <Chip key={side} active={activeSides.has(side)} onClick={() => toggleSide(side)} color={c.fill}>{side === "FAITHFUL" ? "Faith" : side === "INFERNAL" ? "Infernal" : side === "CONTESTED" ? "Contested" : "Neutral"}</Chip>; })}
+          {ALL_SIDES.map((side) => <Chip key={side} active={activeSides.has(side)} onClick={() => toggleSide(side)}>{side === "FAITHFUL" ? "Faith" : side === "INFERNAL" ? "Infernal" : side === "CONTESTED" ? "Contested" : "Neutral"}</Chip>)}
         </div>
         <div className="flex-1" />
         <div className="flex items-center gap-1.5">
@@ -256,7 +259,7 @@ export default function WorldMapClient() {
           <div className="w-px h-4 bg-[#2e1b0e] hidden sm:block" />
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-mono uppercase tracking-widest text-[#c8a96e]/30">Type</span>
-            {ALL_EVENT_TYPES.map((type) => { const c = EVENT_TYPE_COLORS[type]; return <Chip key={type} active={activeTypes.has(type)} onClick={() => toggleType(type)} color={c.fill}>{EVENT_TYPE_LABELS[type]}</Chip>; })}
+            {ALL_EVENT_TYPES.map((type) => <Chip key={type} active={activeTypes.has(type)} onClick={() => toggleType(type)}>{EVENT_TYPE_LABELS[type]}</Chip>)}
           </div>
           <div className="ml-auto text-[10px] font-mono text-[#c8a96e]/30">{filteredEvents.length} event{filteredEvents.length !== 1 ? "s" : ""} shown</div>
         </div>
