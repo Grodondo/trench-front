@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Sector {
+  id            Int                @id @default(autoincrement())
+  name          String
+  slug          String             @unique
+  description   String?
+  controller    String             @default("CONTESTED")
+  faithfulScore Int                @default(0) @map("faithful_score")
+  infernalScore Int                @default(0) @map("infernal_score")
+  svgPathId     String?            @map("svg_path_id")
+  updatedAt     DateTime           @updatedAt @map("updated_at")
+  submissions   BattleSubmission[]
+
+  @@map("sectors")
+}
+
+model BattleSubmission {
+  id              Int           @id @default(autoincrement())
+  submittedAt     DateTime      @default(now()) @map("submitted_at")
+  warbandName     String?       @map("warband_name")
+  playerFaction   String        @map("player_faction")
+  opponentFaction String        @map("opponent_faction")
+  sectorId        Int           @map("sector_id")
+  sector          Sector        @relation(fields: [sectorId], references: [id])
+  outcome         String
+  keyMoment       String?       @map("key_moment")
+  ipHash          String?       @map("ip_hash")
+  weekNumber      Int           @map("week_number")
+  report          BattleReport?
+
+  @@index([sectorId])
+  @@index([weekNumber])
+  @@index([ipHash, submittedAt])
+  @@map("battle_submissions")
+}
+
+model BattleReport {
+  id                 Int               @id @default(autoincrement())
+  slug               String            @unique
+  createdAt          DateTime          @default(now()) @map("created_at")
+  warbandName        String?           @map("warband_name")
+  playerFaction      String?           @map("player_faction")
+  opponentFaction    String?           @map("opponent_faction")
+  location           String?
+  outcome            String?
+  keyMoments         Json?             @map("key_moments")
+  tone               String?
+  generatedNarrative String?           @map("generated_narrative")
+  linkedSubmissionId Int?              @unique @map("linked_submission_id")
+  linkedSubmission   BattleSubmission? @relation(fields: [linkedSubmissionId], references: [id])
+
+  @@map("battle_reports")
+}
+
+model WeeklySnapshot {
+  id               Int      @id @default(autoincrement())
+  weekNumber       Int      @unique @map("week_number")
+  snapshotData     Json     @map("snapshot_data")
+  narrativeSummary String?  @map("narrative_summary")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@map("weekly_snapshots")
+}
