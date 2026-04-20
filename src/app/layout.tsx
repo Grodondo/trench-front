@@ -50,14 +50,11 @@ export default function RootLayout({
               <Link href="/map" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
                 War Map
               </Link>
+              <Link href="/world-map" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
+                World Map
+              </Link>
               <Link href="/submit" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
                 Submit Battle
-              </Link>
-              <Link href="/report/new" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
-                Report
-              </Link>
-              <Link href="/frontline" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
-                Frontline
               </Link>
               <Link href="/about" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
                 About

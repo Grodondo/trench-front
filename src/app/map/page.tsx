@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import WarMap from "@/components/WarMap";
+import SectorWarMap, { type SectorMarker } from "@/components/SectorWarMap";
+import { SECTOR_POSITIONS } from "@/lib/sectorMapData";
 
 export const metadata = {
   title: "War Map — Trench Front",
@@ -7,18 +8,10 @@ export const metadata = {
 };
 
 export default async function MapPage() {
-  let sectors: Array<{
-    id: number;
-    name: string;
-    slug: string;
-    controller: string;
-    faithfulScore: number;
-    infernalScore: number;
-    svgPathId: string | null;
-  }> = [];
+  let sectors: SectorMarker[] = [];
 
   try {
-    sectors = await prisma.sector.findMany({
+    const rows = await prisma.sector.findMany({
       orderBy: { id: "asc" },
       select: {
         id: true,
@@ -27,9 +20,13 @@ export default async function MapPage() {
         controller: true,
         faithfulScore: true,
         infernalScore: true,
-        svgPathId: true,
       },
     });
+    sectors = rows.map((s) => ({
+      ...s,
+      x: SECTOR_POSITIONS[s.slug]?.x ?? 50,
+      y: SECTOR_POSITIONS[s.slug]?.y ?? 50,
+    }));
   } catch {
     // DB not ready
   }
@@ -38,12 +35,11 @@ export default async function MapPage() {
   const faithfulCount = sectors.filter((s) => s.controller === "FAITHFUL").length;
   const infernalCount = sectors.filter((s) => s.controller === "INFERNAL").length;
   const contestedCount = sectors.filter((s) => s.controller === "CONTESTED").length;
-
   const faithPct = totalSectors > 0 ? Math.round((faithfulCount / totalSectors) * 100) : 0;
   const infernalPct = totalSectors > 0 ? Math.round((infernalCount / totalSectors) * 100) : 0;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="text-center mb-10">
         <h1 className="text-4xl font-serif font-bold text-[#c8a96e] tracking-wider mb-1">
           THE FRONT LINE
@@ -54,7 +50,6 @@ export default async function MapPage() {
 
         {totalSectors > 0 && (
           <div className="max-w-lg mx-auto">
-            {/* Control bar */}
             <div className="h-2 w-full bg-[#2e1b0e] rounded-full overflow-hidden flex mb-3">
               <div
                 style={{ width: `${faithPct}%` }}
@@ -74,9 +69,7 @@ export default async function MapPage() {
                 <span className="text-[#c8a96e]/50 uppercase tracking-widest mr-1">Faithful</span>
                 {faithfulCount} / {totalSectors}
               </span>
-              <span className="text-[#4a3728]">
-                {contestedCount} contested
-              </span>
+              <span className="text-[#4a3728]">{contestedCount} contested</span>
               <span className="text-[#cc3333]">
                 {infernalCount} / {totalSectors}
                 <span className="text-[#cc3333]/50 uppercase tracking-widest ml-1">Infernal</span>
@@ -87,7 +80,7 @@ export default async function MapPage() {
       </div>
 
       {sectors.length > 0 ? (
-        <WarMap sectors={sectors} />
+        <SectorWarMap sectors={sectors} />
       ) : (
         <div className="text-center py-20 text-[#4a3728]">
           <p className="text-lg">The map is shrouded in fog.</p>
