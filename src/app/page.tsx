@@ -44,7 +44,7 @@ export default async function HomePage() {
           </p>
           <p className="text-[#e8d5b0]/70 text-lg leading-relaxed mb-8 max-w-xl mx-auto">
             Eight hundred years of war. The trenches stretch forever. Your battles shape the front line.
-            Submit your games, shift the war, and generate cinematic war dispatches from the eternal crusade.
+            Build your warband, submit your games, and shift the eternal crusade.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -60,10 +60,10 @@ export default async function HomePage() {
               Submit a Battle
             </Link>
             <Link
-              href="/report/new"
+              href="/warbands/build"
               className="px-8 py-3 border border-[#4a3728] text-[#e8d5b0]/70 font-bold uppercase tracking-widest rounded hover:border-[#c8a96e] hover:text-[#c8a96e] transition-colors"
             >
-              Generate Report
+              Build a Warband
             </Link>
           </div>
         </div>

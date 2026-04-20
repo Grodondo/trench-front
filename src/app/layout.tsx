@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cinzel, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
+import NavBar from "@/components/NavBar";
 import "./globals.css";
 
 const cinzel = Cinzel({
@@ -37,29 +38,7 @@ export default function RootLayout({
                 TRENCH FRONT
               </span>
             </Link>
-            <div className="flex gap-5 text-sm flex-wrap justify-end">
-              <Link href="/warbands/build" className="text-[#c8a96e] hover:text-[#d4b87a] transition-colors uppercase tracking-wider font-bold">
-                Build Warband
-              </Link>
-              <Link href="/warbands" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
-                Warbands
-              </Link>
-              <Link href="/factions" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
-                Factions
-              </Link>
-              <Link href="/map" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
-                War Map
-              </Link>
-              <Link href="/world-map" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
-                World Map
-              </Link>
-              <Link href="/submit" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
-                Submit Battle
-              </Link>
-              <Link href="/about" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
-                About
-              </Link>
-            </div>
+            <NavBar />
           </div>
         </nav>
 

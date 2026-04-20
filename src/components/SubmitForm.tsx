@@ -42,6 +42,7 @@ export default function SubmitForm() {
   const [regUsername, setRegUsername] = useState("");
   const [regEmail, setRegEmail] = useState("");
   const [regPassword, setRegPassword] = useState("");
+  const [regPasswordConfirm, setRegPasswordConfirm] = useState("");
 
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
@@ -129,8 +130,9 @@ export default function SubmitForm() {
   };
 
   const doRegister = async () => {
-    setAuthLoading(true);
     setAuthError("");
+    if (regPassword !== regPasswordConfirm) { setAuthError("Passwords do not match."); return; }
+    setAuthLoading(true);
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
@@ -141,6 +143,7 @@ export default function SubmitForm() {
       if (!res.ok) { setAuthError(data.error ?? "Registration failed."); return; }
       setIsLoggedIn(true);
       setAuthStep("none");
+      setRegPasswordConfirm("");
       loadWarbands();
     } finally {
       setAuthLoading(false);
@@ -221,8 +224,9 @@ export default function SubmitForm() {
         <input value={regUsername} onChange={(e) => setRegUsername(e.target.value)} placeholder="Username (max 30 chars)" className={inputClass} maxLength={30} />
         <input type="email" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} placeholder="Email" className={inputClass} />
         <input type="password" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} placeholder="Password (min 8 chars)" className={inputClass} minLength={8} />
+        <input type="password" value={regPasswordConfirm} onChange={(e) => setRegPasswordConfirm(e.target.value)} placeholder="Confirm password" className={inputClass + (regPasswordConfirm && regPassword !== regPasswordConfirm ? " border-red-700" : "")} />
         {authError && <p className="text-xs text-red-400">{authError}</p>}
-        <button onClick={doRegister} disabled={authLoading || !regUsername || !regEmail || !regPassword}
+        <button onClick={doRegister} disabled={authLoading || !regUsername || !regEmail || !regPassword || !regPasswordConfirm}
           className="w-full py-2.5 bg-[#c8a96e] text-[#1a0f0a] font-bold uppercase tracking-widest rounded hover:bg-[#d4b87a] disabled:opacity-40 transition-colors text-sm">
           {authLoading ? "Creating accountâ€¦" : "Create Account"}
         </button>

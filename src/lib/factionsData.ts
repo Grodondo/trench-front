@@ -187,7 +187,8 @@ export const FACTION_DATA: FactionData[] = [
     tagline: "Plague bearers of Beelzebub",
     description:
       "Servants of Beelzebub, Lord of Flies, the Cult spreads infection and despair across the trench lines. Their warriors are bloated with plague-blessings, immune to pain and disease, and utterly devoted to drowning the world in rot and corruption.",
-    imageUrl: null,
+    imageUrl:
+      "https://synod.trench-companion.com/wp-content/uploads/2025/07/Cult-of-the-Black-Grail-Faction-Image.jpg",
     accentColor: "#3d5a00",
     units: [
       { name: "Lord of Tumors", role: "CAPTAIN", cost: "130", traits: ["Fear", "Strong", "Tough", "Negate Gas"] },
