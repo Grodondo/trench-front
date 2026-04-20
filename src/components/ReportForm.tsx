@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import FactionSelect from "./FactionSelect";
 
 export default function ReportForm() {
@@ -11,9 +11,22 @@ export default function ReportForm() {
   const [outcome, setOutcome] = useState("");
   const [keyMoments, setKeyMoments] = useState(["", "", ""]);
   const [tone, setTone] = useState("GRIM");
+  const [useAI, setUseAI] = useState(false);
+  const [aiAvailable, setAiAvailable] = useState(false);
+  const [aiGenerated, setAiGenerated] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [reportSlug, setReportSlug] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Check if AI generation is available
+  useEffect(() => {
+    fetch("/api/reports")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.aiAvailable) setAiAvailable(true);
+      })
+      .catch(() => {});
+  }, []);
 
   function updateKeyMoment(index: number, value: string) {
     const updated = [...keyMoments];
@@ -38,12 +51,14 @@ export default function ReportForm() {
           outcome,
           keyMoments: keyMoments.filter((m) => m.trim()),
           tone,
+          useAI,
         }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
+        setAiGenerated(!!data.aiGenerated);
         setReportSlug(data.slug);
       } else {
         setError(data.error || "Failed to generate report.");
@@ -58,6 +73,17 @@ export default function ReportForm() {
   if (reportSlug) {
     return (
       <div className="text-center space-y-4">
+        {aiGenerated ? (
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#4a2080]/30 border border-[#8b5cf6]/40 text-[#c8a0c8] text-xs font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#8b5cf6]" />
+            Generated with Groq AI
+          </div>
+        ) : (
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#2e1b0e]/60 border border-[#c8a96e]/20 text-[#c8a96e]/50 text-xs font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#c8a96e]/40" />
+            Generated from templates
+          </div>
+        )}
         <p className="text-[#c8a96e] text-lg">War dispatch generated.</p>
         <a
           href={`/report/${reportSlug}`}
@@ -75,6 +101,7 @@ export default function ReportForm() {
             setOutcome("");
             setKeyMoments(["", "", ""]);
             setTone("GRIM");
+            setAiGenerated(false);
           }}
           className="block mx-auto text-sm text-[#4a3728] hover:text-[#c8a96e] transition-colors"
         >
@@ -191,12 +218,48 @@ export default function ReportForm() {
         </div>
       </div>
 
+      {/* AI Generation toggle — only shown when Groq is configured */}
+      {aiAvailable && (
+        <button
+          type="button"
+          onClick={() => setUseAI((v) => !v)}
+          className={`flex items-center gap-3 w-full px-4 py-3 rounded border transition-all ${
+            useAI
+              ? "border-[#8b5cf6]/60 bg-[#4a2080]/20 text-[#c8a0c8]"
+              : "border-[#2e1b0e] bg-transparent text-[#4a3728] hover:border-[#4a3728]"
+          }`}
+        >
+          <div className={`w-8 h-4 rounded-full relative transition-colors ${
+            useAI ? "bg-[#8b5cf6]" : "bg-[#2e1b0e]"
+          }`}>
+            <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${
+              useAI ? "left-4" : "left-0.5"
+            }`} />
+          </div>
+          <div className="flex-1 text-left">
+            <span className="block text-sm font-bold uppercase tracking-wider">
+              {useAI ? "AI Generation Active" : "Use AI Generation"}
+            </span>
+            <span className="block text-xs mt-0.5 opacity-60">
+              {useAI ? "Groq LLaMA will write your dispatch" : "Click to enable Groq-powered narrative"}
+            </span>
+          </div>
+          {useAI && <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#8b5cf6]/20 border border-[#8b5cf6]/40">GROQ</span>}
+        </button>
+      )}
+
       <button
         type="submit"
         disabled={submitting || !playerFaction || !opponentFaction || !outcome}
         className="w-full py-3 bg-[#c8a96e] text-[#1a0f0a] font-bold uppercase tracking-widest rounded hover:bg-[#d4b87a] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
       >
-        {submitting ? "Generating Dispatch..." : "Generate War Dispatch"}
+        {submitting
+          ? useAI
+            ? "Transmitting to Groq..."
+            : "Generating Dispatch..."
+          : useAI
+          ? "Generate with AI"
+          : "Generate War Dispatch"}
       </button>
 
       {error && (

@@ -4,11 +4,17 @@ import { nanoid } from "nanoid";
 import { sanitizeText } from "@/lib/utils";
 import { FACTIONS } from "@/lib/factions";
 import { generateNarrative } from "@/lib/narrativeTemplates";
+import { isAIAvailable, generateAINarrative } from "@/lib/ai";
+
+/** GET /api/reports — capability check */
+export async function GET() {
+  return NextResponse.json({ aiAvailable: isAIAvailable() });
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { warbandName, playerFaction, opponentFaction, location, outcome, keyMoments, tone } = body;
+    const { warbandName, playerFaction, opponentFaction, location, outcome, keyMoments, tone, useAI } = body;
 
     // Validate required fields
     if (!playerFaction || !opponentFaction || !outcome) {
@@ -33,18 +39,46 @@ export async function POST(request: NextRequest) {
           .filter((m: unknown) => typeof m === "string" && m.trim())
           .slice(0, 3)
           .map((m: string) => sanitizeText(m, 60))
-      : null;
+      : [];
     const cleanTone = tone && ["HEROIC", "GRIM", "PYRRHIC"].includes(tone) ? tone : "GRIM";
 
-    // Generate narrative
-    const narrative = generateNarrative(
-      outcome,
-      cleanWarband,
-      opponentFaction,
-      cleanLocation || "the front",
-      cleanMoments || undefined,
-      cleanTone
-    );
+    // Generate narrative — try AI first if requested, fall back to templates
+    let narrative: string;
+    let aiGenerated = false;
+
+    if (useAI === true && isAIAvailable()) {
+      try {
+        narrative = await generateAINarrative({
+          warbandName: cleanWarband,
+          playerFaction,
+          opponentFaction,
+          location: cleanLocation || "the front",
+          outcome,
+          keyMoments: cleanMoments,
+          tone: cleanTone,
+        });
+        aiGenerated = true;
+      } catch (aiError) {
+        console.warn("AI generation failed, falling back to templates:", aiError);
+        narrative = generateNarrative(
+          outcome,
+          cleanWarband,
+          opponentFaction,
+          cleanLocation || "the front",
+          cleanMoments.length > 0 ? cleanMoments : undefined,
+          cleanTone
+        );
+      }
+    } else {
+      narrative = generateNarrative(
+        outcome,
+        cleanWarband,
+        opponentFaction,
+        cleanLocation || "the front",
+        cleanMoments.length > 0 ? cleanMoments : undefined,
+        cleanTone
+      );
+    }
 
     // Create report
     const slug = nanoid(10);
@@ -56,15 +90,16 @@ export async function POST(request: NextRequest) {
         opponentFaction,
         location: cleanLocation,
         outcome,
-        keyMoments: cleanMoments ?? undefined,
+        keyMoments: cleanMoments.length > 0 ? cleanMoments : undefined,
         tone: cleanTone,
         generatedNarrative: narrative,
       },
     });
 
-    return NextResponse.json({ success: true, slug: report.slug }, { status: 201 });
+    return NextResponse.json({ success: true, slug: report.slug, aiGenerated }, { status: 201 });
   } catch (error) {
     console.error("Report generation error:", error);
     return NextResponse.json({ error: "Internal server error." }, { status: 500 });
   }
 }
+
