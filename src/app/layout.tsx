@@ -37,9 +37,15 @@ export default function RootLayout({
                 TRENCH FRONT
               </span>
             </Link>
-            <div className="flex gap-6 text-sm">
+            <div className="flex gap-5 text-sm flex-wrap justify-end">
               <Link href="/map" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
                 War Map
+              </Link>
+              <Link href="/world-map" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
+                World Map
+              </Link>
+              <Link href="/factions" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
+                Factions
               </Link>
               <Link href="/submit" className="text-[#c8a96e]/70 hover:text-[#c8a96e] transition-colors uppercase tracking-wider">
                 Submit Battle
