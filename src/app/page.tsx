@@ -51,10 +51,10 @@ export default async function HomePage() {
               href="/map"
               className="px-8 py-3 bg-[#c8a96e] text-[#1a0f0a] font-bold uppercase tracking-widest rounded hover:bg-[#d4b87a] transition-colors"
             >
-              View the War Map
+              The Front Line
             </Link>
             <Link
-              href="/submit"
+              href="/map?tab=submit"
               className="px-8 py-3 border border-[#c8a96e] text-[#c8a96e] font-bold uppercase tracking-widest rounded hover:bg-[#c8a96e]/10 transition-colors"
             >
               Submit a Battle

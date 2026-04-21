@@ -8,9 +8,8 @@ const NAV_LINKS = [
   { href: "/warbands/build", label: "Build Warband", primary: true },
   { href: "/warbands", label: "Warbands" },
   { href: "/factions", label: "Factions" },
-  { href: "/map", label: "War Map" },
+  { href: "/map", label: "Front Line" },
   { href: "/world-map", label: "World Map" },
-  { href: "/submit", label: "Submit Battle" },
   { href: "/about", label: "About" },
 ];
 
