@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
-import { getFactionById, type RosterUnit } from "@/lib/gameData";
+import { getFactionById, UNIT_IMAGES, type RosterUnit } from "@/lib/gameData";
 
 export const dynamic = "force-dynamic";
 
@@ -136,9 +136,24 @@ export default async function WarbandDetailPage({ params }: Props) {
                   return (
                     <div
                       key={idx}
-                      className="bg-[#1a0f0a] border border-[#2e1b0e] rounded p-4 flex flex-col sm:flex-row sm:items-start gap-3"
+                      className="bg-[#1a0f0a] border border-[#2e1b0e] rounded overflow-hidden flex"
                       style={{ borderLeftColor: roleColor, borderLeftWidth: 3 }}
                     >
+                      {/* Unit art */}
+                      {UNIT_IMAGES[unit.id] && (
+                        <div className="shrink-0 w-20 sm:w-24 relative overflow-hidden">
+                          <img
+                            src={UNIT_IMAGES[unit.id]}
+                            alt={unit.name}
+                            className="absolute inset-0 w-full h-full object-cover object-top"
+                            style={{ filter: "brightness(0.8) contrast(1.05)" }}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#1a0f0a]/90" />
+                        </div>
+                      )}
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0 p-4 flex flex-col sm:flex-row sm:items-start gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-serif font-bold" style={{ color: roleColor }}>
@@ -187,6 +202,7 @@ export default async function WarbandDetailPage({ params }: Props) {
                         <div className="text-sm font-mono text-[#c8a96e]/70">{unitCost}d</div>
                         {unitGlory > 0 && <div className="text-xs font-mono text-amber-600">{unitGlory}⛭</div>}
                       </div>
+                      </div>{/* end content */}
                     </div>
                   );
                 })}

@@ -45,6 +45,8 @@ export interface EquipmentItem {
   allowedUnitIds?: string[];
   /** Elite units are also allowed even when allowedUnitIds is set */
   allowedForElite?: boolean;
+  /** Item occupies the Headgear slot (max 1 per model) */
+  headgear?: boolean;
   /** Notes displayed in UI */
   note?: string;
 }
@@ -272,9 +274,9 @@ export const GAME_FACTIONS: FactionData[] = [
       d("na-heavy-ballistic-shield", "Heavy Ballistic Shield", "SHIELD", 15, null, { note: "Machine Armour only" }),
       trenchShield,
       d("binoculars", "Binoculars", "EQUIPMENT", 10, null, { eliteOnly: true }),
-      d("combat-helmet", "Combat Helmet", "EQUIPMENT", 5),
+      d("combat-helmet", "Combat Helmet", "EQUIPMENT", 5, null, { headgear: true }),
       g("na-field-shrine", "Field Shrine", "EQUIPMENT", 2, 1),
-      d("gas-mask", "Gas Mask", "EQUIPMENT", 5),
+      d("gas-mask", "Gas Mask", "EQUIPMENT", 5, null, { headgear: true }),
       g("na-martyrdom-pills", "Martyrdom Pills", "EQUIPMENT", 1, 2, { eliteOnly: true }),
       d("medi-kit", "Medi-Kit", "EQUIPMENT", 5),
       d("mountaineer-kit", "Mountaineer Kit", "EQUIPMENT", 3, 4),
@@ -406,10 +408,10 @@ export const GAME_FACTIONS: FactionData[] = [
       trenchShield,
       d("tp-blessed-icon", "Blessed Icon", "EQUIPMENT", 15),
       g("tp-field-shrine", "Field Shrine", "EQUIPMENT", 2),
-      d("gas-mask", "Gas Mask", "EQUIPMENT", 5),
+      d("gas-mask", "Gas Mask", "EQUIPMENT", 5, null, { headgear: true }),
       g("tp-holy-relic", "Holy Relic", "EQUIPMENT", 2, null, { eliteOnly: true }),
       d("tp-incendiary-ammo", "Incendiary Ammunition", "EQUIPMENT", 15, 1),
-      d("tp-iron-capirote", "Iron Capirote", "EQUIPMENT", 7),
+      d("tp-iron-capirote", "Iron Capirote", "EQUIPMENT", 7, null, { headgear: true }),
       d("tp-martyrdom-device", "Martyrdom Device", "EQUIPMENT", 35, 4, { allowedUnitIds: ["tp-ecclesiastic-prisoner"] }),
       d("tp-martyrdom-pills", "Martyrdom Pills", "EQUIPMENT", 20, 3),
       d("medi-kit", "Medi-Kit", "EQUIPMENT", 5),
@@ -549,8 +551,8 @@ export const GAME_FACTIONS: FactionData[] = [
       d("is-alchemical-ammo", "Alchemical Ammunition", "EQUIPMENT", 3),
       d("binoculars", "Binoculars", "EQUIPMENT", 10, null, { eliteOnly: true }),
       d("is-cloak-of-alamut", "Cloak of Alamut", "EQUIPMENT", 25, 1, { eliteOnly: true }),
-      d("combat-helmet", "Combat Helmet", "EQUIPMENT", 5),
-      d("gas-mask", "Gas Mask", "EQUIPMENT", 5),
+      d("combat-helmet", "Combat Helmet", "EQUIPMENT", 5, null, { headgear: true }),
+      d("gas-mask", "Gas Mask", "EQUIPMENT", 5, null, { headgear: true }),
       g("is-holy-relic", "Holy Relic", "EQUIPMENT", 2, null, { eliteOnly: true }),
       d("is-marid-shovel", "Marid Shovel", "EQUIPMENT", 15, null, { allowedUnitIds: ["is-brazen-bull"] }),
       d("medi-kit", "Medi-Kit", "EQUIPMENT", 5),
@@ -686,8 +688,8 @@ export const GAME_FACTIONS: FactionData[] = [
       ...commonArmour.filter(e => e.id !== "reinforced-armour"),
       d("reinforced-armour", "Reinforced Armour", "ARMOUR", 40, null, { allowedUnitIds: ["hl-anointed-heavy"], allowedForElite: true, note: "Anointed Heavy Infantry or Elite only" }),
       trenchShield,
-      d("combat-helmet", "Combat Helmet", "EQUIPMENT", 5),
-      d("gas-mask", "Gas Mask", "EQUIPMENT", 5),
+      d("combat-helmet", "Combat Helmet", "EQUIPMENT", 5, null, { headgear: true }),
+      d("gas-mask", "Gas Mask", "EQUIPMENT", 5, null, { headgear: true }),
       d("hl-hellbound-contract", "Hellbound Soul Contract", "EQUIPMENT", 5, 3, { allowedUnitIds: ["hl-heretic-trooper"] }),
       d("hl-incendiary-ammo", "Incendiary Ammunition", "EQUIPMENT", 15, 1),
       d("hl-infernal-brand-mark", "Infernal Brand Mark", "EQUIPMENT", 5),
@@ -821,9 +823,9 @@ export const GAME_FACTIONS: FactionData[] = [
       d("standard-armour", "Standard Armour", "ARMOUR", 15),
       d("reinforced-armour", "Reinforced Armour", "ARMOUR", 40, null, { eliteOnly: true }),
       trenchShield,
-      d("combat-helmet", "Combat Helmet", "EQUIPMENT", 5),
-      d("cs-crown-of-hellfire", "Crown of Hellfire", "EQUIPMENT", 15, null, { allowedUnitIds: ["cs-pit-locust"], allowedForElite: true, note: "Elite or Pit Locust only" }),
-      d("gas-mask", "Gas Mask", "EQUIPMENT", 5),
+      d("combat-helmet", "Combat Helmet", "EQUIPMENT", 5, null, { headgear: true }),
+      d("cs-crown-of-hellfire", "Crown of Hellfire", "EQUIPMENT", 15, null, { allowedUnitIds: ["cs-pit-locust"], allowedForElite: true, headgear: true, note: "Elite or Pit Locust only" }),
+      d("gas-mask", "Gas Mask", "EQUIPMENT", 5, null, { headgear: true }),
       d("cs-incendiary-ammo", "Incendiary Ammunition", "EQUIPMENT", 15, 1),
       d("musical-instrument", "Musical Instrument", "EQUIPMENT", 15, 1),
       d("cs-restraining-muzzle", "Restraining Muzzle", "EQUIPMENT", 10, 3, { allowedUnitIds: ["cs-yoke-fiend"] }),
@@ -831,7 +833,7 @@ export const GAME_FACTIONS: FactionData[] = [
       d("cs-unholy-relic", "Unholy Relic", "EQUIPMENT", 15),
       d("cs-unholy-trinket", "Unholy Trinket", "EQUIPMENT", 15),
       ...commonGloryEquipment,
-      g("cs-cruel-helmet", "Cruel Helmet", "EQUIPMENT", 2, 2, { allowedUnitIds: ["cs-wretched"] }),
+      g("cs-cruel-helmet", "Cruel Helmet", "EQUIPMENT", 2, 2, { allowedUnitIds: ["cs-wretched"], headgear: true }),
       g("cs-koraktor", "Koraktor, the Great Tome of Hell", "EQUIPMENT", 8, 1, { allowedUnitIds: ["cs-sorcerer"] }),
       g("cs-lordship-of-the-world", "Lordship of this World", "EQUIPMENT", 9, 1, { allowedUnitIds: ["cs-sorcerer", "cs-praetor"] }),
       g("cs-piece-of-silver", "Piece of Silver", "EQUIPMENT", 12, 1, { eliteOnly: true }),
@@ -969,8 +971,8 @@ export const GAME_FACTIONS: FactionData[] = [
       d("reinforced-armour", "Reinforced Armour", "ARMOUR", 40, null, { eliteOnly: true }),
       d("cbg-black-grail-shield", "Black Grail Shield", "SHIELD", 20, null, { eliteOnly: true }),
       trenchShield,
-      d("combat-helmet", "Combat Helmet", "EQUIPMENT", 5),
-      d("cbg-compound-eyes-helmet", "Compound Eyes Helmet", "EQUIPMENT", 10, 3, { allowedUnitIds: ["cbg-herald"], allowedForElite: true, note: "Herald or Elite only" }),
+      d("combat-helmet", "Combat Helmet", "EQUIPMENT", 5, null, { headgear: true }),
+      d("cbg-compound-eyes-helmet", "Compound Eyes Helmet", "EQUIPMENT", 10, 3, { allowedUnitIds: ["cbg-herald"], allowedForElite: true, headgear: true, note: "Herald or Elite only" }),
       g("cbg-field-shrine", "Field Shrine", "EQUIPMENT", 2),
       d("cbg-grail-devotee-d", "Grail Devotee", "EQUIPMENT", 15, 2, { allowedUnitIds: ["cbg-herald"], allowedForElite: true, note: "Herald or Elite only" }),
       g("cbg-grail-devotee-g", "Grail Devotee", "EQUIPMENT", 2, 2, { allowedUnitIds: ["cbg-herald"], allowedForElite: true, note: "Herald or Elite only" }),
@@ -1046,6 +1048,11 @@ export function validateWarband(
     if (unit.costType === "DUCATS") totalDucats += unit.cost;
     else totalGlory += unit.cost;
 
+    // Per-unit slot counts
+    let headgearCount = 0;
+    let armourCount = 0;
+    let shieldCount = 0;
+
     // Equipment costs + restrictions
     for (const eqId of ru.equipment) {
       const eq = faction.armoury.find((e) => e.id === eqId);
@@ -1066,6 +1073,20 @@ export function validateWarband(
           errors.push(`${unit.name} cannot take ${eq.name} (restricted to specific units)`);
         }
       }
+
+      // Per-unit slot limits
+      if (eq.headgear) {
+        headgearCount++;
+        if (headgearCount > 1) errors.push(`${ru.customName ?? unit.name} cannot wear more than one piece of Headgear`);
+      }
+      if (eq.category === "ARMOUR") {
+        armourCount++;
+        if (armourCount > 1) errors.push(`${ru.customName ?? unit.name} cannot wear more than one piece of Armour`);
+      }
+      if (eq.category === "SHIELD") {
+        shieldCount++;
+        if (shieldCount > 1) errors.push(`${ru.customName ?? unit.name} cannot carry more than one Shield`);
+      }
     }
   }
 
@@ -1078,6 +1099,15 @@ export function validateWarband(
     errors.push("Warband must include at least one Captain");
   } else if (captains.length > 1) {
     errors.push("Warband may only have one Captain");
+  }
+
+  // --- Max 6 Elites ---
+  const eliteCount = roster.filter((ru) => {
+    const unit = faction.units.find((u) => u.id === ru.unitTemplateId);
+    return unit?.keywords.includes("ELITE");
+  }).length;
+  if (eliteCount > 6) {
+    errors.push(`Too many Elite models (${eliteCount} / max 6)`);
   }
 
   // --- Availability limits ---

@@ -150,9 +150,10 @@ function UnitRosterCard({
     return true;
   });
 
-  const equippedItems = entry.equipment
-    .map((id) => faction.armoury.find((e) => e.id === id))
-    .filter(Boolean) as EquipmentItem[];
+  // Track per-unit slot usage
+  const hasHeadgear = equippedItems.some((e) => e.headgear);
+  const hasArmour = equippedItems.some((e) => e.category === "ARMOUR");
+  const hasShield = equippedItems.some((e) => e.category === "SHIELD");
 
   const roleColor =
     unit.role === "CAPTAIN"
@@ -293,13 +294,23 @@ function UnitRosterCard({
                   <div className="text-[9px] uppercase tracking-widest text-[#4a3728] mt-1.5 mb-0.5 px-1">{cat}</div>
                   {items.map((eq) => {
                     const isEquipped = entry.equipment.includes(eq.id);
+                    // Slot conflict: can't add another headgear/armour/shield if one is already worn
+                    const slotBlocked =
+                      !isEquipped && (
+                        (eq.headgear && hasHeadgear) ||
+                        (eq.category === "ARMOUR" && hasArmour) ||
+                        (eq.category === "SHIELD" && hasShield)
+                      );
                     return (
                       <button
                         key={eq.id}
-                        onClick={() => onEquipmentChange(entry._key, eq.id, !isEquipped)}
+                        disabled={slotBlocked}
+                        onClick={() => !slotBlocked && onEquipmentChange(entry._key, eq.id, !isEquipped)}
                         className={`w-full text-left text-[10px] px-2 py-1 rounded flex items-center justify-between transition-colors ${
                           isEquipped
                             ? "bg-[#c8a96e]/15 text-[#c8a96e]"
+                            : slotBlocked
+                            ? "opacity-30 cursor-not-allowed text-[#e8d5b0]/30"
                             : "hover:bg-[#2e1b0e] text-[#e8d5b0]/50 hover:text-[#e8d5b0]"
                         }`}
                       >
@@ -307,6 +318,7 @@ function UnitRosterCard({
                           {isEquipped && <span className="text-[#c8a96e]">✓</span>}
                           {eq.name}
                           {eq.note && <span className="text-[#4a3728] italic"> · {eq.note}</span>}
+                          {slotBlocked && <span className="text-[#4a3728] italic"> · slot taken</span>}
                         </span>
                         <span className="font-mono text-[#c8a96e]/60 shrink-0 ml-2">
                           {eq.costType === "DUCATS" ? `${eq.cost}d` : `${eq.cost}⛭`}
