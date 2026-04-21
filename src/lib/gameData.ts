@@ -43,6 +43,8 @@ export interface EquipmentItem {
   eliteOnly?: boolean;
   /** Only specific unit IDs may take this */
   allowedUnitIds?: string[];
+  /** Elite units are also allowed even when allowedUnitIds is set */
+  allowedForElite?: boolean;
   /** Notes displayed in UI */
   note?: string;
 }
@@ -254,7 +256,10 @@ export const GAME_FACTIONS: FactionData[] = [
       ...commonMelee,
       d("na-auto-pistol", "Automatic Pistol", "RANGED", 20, 3, { eliteOnly: true }),
       d("na-auto-rifle", "Automatic Rifle", "RANGED", 40, 1),
-      ...commonRangedBasic.filter(e => !["musket"].includes(e.id)),
+      ...commonRangedBasic.filter(e => !["musket", "machine-gun", "heavy-flamethrower", "auto-shotgun"].includes(e.id)),
+      d("auto-shotgun", "Automatic Shotgun", "RANGED", 15, 2),
+      d("machine-gun", "Machine Gun", "RANGED", 50, 2),
+      d("heavy-flamethrower", "Heavy Flamethrower", "RANGED", 55, 1),
       d("na-heavy-shotgun", "Heavy Shotgun", "RANGED", 20, 2),
       d("na-sniper-rifle", "Sniper Rifle", "RANGED", 35, 3),
       d("na-submachine-gun", "Submachine Gun", "RANGED", 30, 2),
@@ -262,7 +267,7 @@ export const GAME_FACTIONS: FactionData[] = [
       d("incendiary-grenades", "Incendiary Grenades", "GRENADE", 15, 2),
       d("na-satchel-charge", "Satchel Charge", "GRENADE", 15, 3),
       d("na-machine-armour", "Machine Armour", "ARMOUR", 50, 1, { eliteOnly: true }),
-      d("reinforced-armour", "Reinforced Armour", "ARMOUR", 40, null, { allowedUnitIds: ["na-mech-heavy"], note: "Mechanized Heavy Infantry or Elite only" }),
+      d("reinforced-armour", "Reinforced Armour", "ARMOUR", 40, null, { allowedUnitIds: ["na-mech-heavy"], allowedForElite: true, note: "Mechanized Heavy Infantry or Elite only" }),
       d("standard-armour", "Standard Armour", "ARMOUR", 15),
       d("na-heavy-ballistic-shield", "Heavy Ballistic Shield", "SHIELD", 15, null, { note: "Machine Armour only" }),
       trenchShield,
@@ -275,7 +280,6 @@ export const GAME_FACTIONS: FactionData[] = [
       d("mountaineer-kit", "Mountaineer Kit", "EQUIPMENT", 3, 4),
       d("musical-instrument", "Musical Instrument", "EQUIPMENT", 15, 1),
       d("shovel", "Shovel", "EQUIPMENT", 5),
-      g("troop-flag", "Troop Flag", "EQUIPMENT", 1, 1),
       ...commonGloryEquipment,
       g("na-book-of-battle-prayers", "Book of Battle Prayers", "EQUIPMENT", 7, 1, { eliteOnly: true }),
       g("na-great-banner", "Great Banner of New Antioch", "EQUIPMENT", 12, 1),
@@ -535,11 +539,11 @@ export const GAME_FACTIONS: FactionData[] = [
       d("pistol", "Pistol / Revolver", "RANGED", 6),
       d("shotgun", "Shotgun", "RANGED", 10),
       d("is-siege-jezzail", "Siege Jezzail", "RANGED", 30),
-      d("is-sniper-rifle", "Sniper Rifle", "RANGED", 35, 2, { note: "Janissary or Elite only" }),
+      d("is-sniper-rifle", "Sniper Rifle", "RANGED", 35, 2, { allowedUnitIds: ["is-janissary"], allowedForElite: true, note: "Janissary or Elite only" }),
       d("frag-grenades", "Frag Grenades", "GRENADE", 7),
       d("is-incendiary-grenades", "Incendiary Grenades", "GRENADE", 15, null, { allowedUnitIds: ["is-alchemist"] }),
       d("is-alchemist-armour", "Alchemist Armour", "ARMOUR", 50, 1, { eliteOnly: true }),
-      d("reinforced-armour", "Reinforced Armour", "ARMOUR", 40, null, { note: "Janissary or Elite only" }),
+      d("reinforced-armour", "Reinforced Armour", "ARMOUR", 40, null, { allowedUnitIds: ["is-janissary"], allowedForElite: true, note: "Janissary or Elite only" }),
       d("standard-armour", "Standard Armour", "ARMOUR", 15),
       trenchShield,
       d("is-alchemical-ammo", "Alchemical Ammunition", "EQUIPMENT", 3),
@@ -554,7 +558,6 @@ export const GAME_FACTIONS: FactionData[] = [
       d("musical-instrument", "Musical Instrument", "EQUIPMENT", 15, 1),
       d("shovel", "Shovel", "EQUIPMENT", 5),
       g("is-takwin-anqa", "Takwin Anqa Bird", "EQUIPMENT", 2, 1, { eliteOnly: true }),
-      g("troop-flag", "Troop Flag", "EQUIPMENT", 1, 1),
       d("is-wind-amulet", "Wind Amulet", "EQUIPMENT", 10, 2),
       ...commonGloryEquipment,
       g("is-kilij", "Kilij", "MELEE", 2, 2, { eliteOnly: true }),
@@ -670,7 +673,7 @@ export const GAME_FACTIONS: FactionData[] = [
     armoury: [
       bayonet,
       ...commonMelee,
-      d("hl-hellblade", "Hellblade", "MELEE", 15, 2, { note: "Glory cost: 1" }),
+      g("hl-hellblade", "Hellblade", "MELEE", 1, 2),
       d("hl-tartarus-claws", "Tartarus Claws", "MELEE", 15, null, { allowedUnitIds: ["hl-death-commando"] }),
       d("hl-sacrificial-blade", "Sacrificial Blade", "MELEE", 23, 2, { eliteOnly: true }),
       g("hl-blasphemous-staff", "Blasphemous Staff", "MELEE", 2, null, { eliteOnly: true }),
@@ -680,7 +683,8 @@ export const GAME_FACTIONS: FactionData[] = [
       d("hl-silenced-pistol", "Silenced Pistol", "RANGED", 15, null, { eliteOnly: true }),
       g("hl-submachine-gun", "Submachine Gun", "RANGED", 2, null),
       ...commonGrenades,
-      ...commonArmour,
+      ...commonArmour.filter(e => e.id !== "reinforced-armour"),
+      d("reinforced-armour", "Reinforced Armour", "ARMOUR", 40, null, { allowedUnitIds: ["hl-anointed-heavy"], allowedForElite: true, note: "Anointed Heavy Infantry or Elite only" }),
       trenchShield,
       d("combat-helmet", "Combat Helmet", "EQUIPMENT", 5),
       d("gas-mask", "Gas Mask", "EQUIPMENT", 5),
@@ -690,7 +694,6 @@ export const GAME_FACTIONS: FactionData[] = [
       d("mountaineer-kit", "Mountaineer Kit", "EQUIPMENT", 3, 2),
       d("musical-instrument", "Musical Instrument", "EQUIPMENT", 15, 1),
       d("shovel", "Shovel", "EQUIPMENT", 5),
-      g("troop-flag", "Troop Flag", "EQUIPMENT", 1, 1),
       d("hl-unholy-relic", "Unholy Relic", "EQUIPMENT", 15),
       d("hl-unholy-trinket", "Unholy Trinket", "EQUIPMENT", 15),
       ...commonGloryEquipment,
@@ -819,13 +822,12 @@ export const GAME_FACTIONS: FactionData[] = [
       d("reinforced-armour", "Reinforced Armour", "ARMOUR", 40, null, { eliteOnly: true }),
       trenchShield,
       d("combat-helmet", "Combat Helmet", "EQUIPMENT", 5),
-      d("cs-crown-of-hellfire", "Crown of Hellfire", "EQUIPMENT", 15, null, { note: "Elite and Pit Locust only" }),
+      d("cs-crown-of-hellfire", "Crown of Hellfire", "EQUIPMENT", 15, null, { allowedUnitIds: ["cs-pit-locust"], allowedForElite: true, note: "Elite or Pit Locust only" }),
       d("gas-mask", "Gas Mask", "EQUIPMENT", 5),
       d("cs-incendiary-ammo", "Incendiary Ammunition", "EQUIPMENT", 15, 1),
       d("musical-instrument", "Musical Instrument", "EQUIPMENT", 15, 1),
       d("cs-restraining-muzzle", "Restraining Muzzle", "EQUIPMENT", 10, 3, { allowedUnitIds: ["cs-yoke-fiend"] }),
       d("shovel", "Shovel", "EQUIPMENT", 5, null, { allowedUnitIds: ["cs-yoke-fiend", "cs-wretched"] }),
-      g("troop-flag", "Troop Flag", "EQUIPMENT", 1, 1),
       d("cs-unholy-relic", "Unholy Relic", "EQUIPMENT", 15),
       d("cs-unholy-trinket", "Unholy Trinket", "EQUIPMENT", 15),
       ...commonGloryEquipment,
@@ -968,11 +970,11 @@ export const GAME_FACTIONS: FactionData[] = [
       d("cbg-black-grail-shield", "Black Grail Shield", "SHIELD", 20, null, { eliteOnly: true }),
       trenchShield,
       d("combat-helmet", "Combat Helmet", "EQUIPMENT", 5),
-      d("cbg-compound-eyes-helmet", "Compound Eyes Helmet", "EQUIPMENT", 10, 3, { note: "Herald or Elite only" }),
+      d("cbg-compound-eyes-helmet", "Compound Eyes Helmet", "EQUIPMENT", 10, 3, { allowedUnitIds: ["cbg-herald"], allowedForElite: true, note: "Herald or Elite only" }),
       g("cbg-field-shrine", "Field Shrine", "EQUIPMENT", 2),
-      d("cbg-grail-devotee-d", "Grail Devotee", "EQUIPMENT", 15, 2, { note: "Herald or Elite only" }),
+      d("cbg-grail-devotee-d", "Grail Devotee", "EQUIPMENT", 15, 2, { allowedUnitIds: ["cbg-herald"], allowedForElite: true, note: "Herald or Elite only" }),
+      g("cbg-grail-devotee-g", "Grail Devotee", "EQUIPMENT", 2, 2, { allowedUnitIds: ["cbg-herald"], allowedForElite: true, note: "Herald or Elite only" }),
       d("musical-instrument", "Musical Instrument", "EQUIPMENT", 15, 1),
-      g("troop-flag", "Troop Flag", "EQUIPMENT", 1, 1),
       d("cbg-unholy-trinket", "Unholy Trinket", "EQUIPMENT", 15),
       ...commonGloryEquipment,
       g("cbg-armour-of-the-fly", "Armour of the Fly", "ARMOUR", 7, 1, { eliteOnly: true }),
@@ -1060,7 +1062,9 @@ export function validateWarband(
       }
       // Allowed unit check
       if (eq.allowedUnitIds && eq.allowedUnitIds.length > 0 && !eq.allowedUnitIds.includes(unit.id)) {
-        errors.push(`${unit.name} cannot take ${eq.name} (restricted to specific units)`);
+        if (!eq.allowedForElite || !unit.keywords.includes("ELITE")) {
+          errors.push(`${unit.name} cannot take ${eq.name} (restricted to specific units)`);
+        }
       }
     }
   }
@@ -1115,3 +1119,69 @@ export function validateWarband(
     totalGlory,
   };
 }
+
+// ─── Unit Images ──────────────────────────────────────────────────────────────
+
+const CDN = "https://synod.trench-companion.com/wp-content/uploads";
+
+export const UNIT_IMAGES: Record<string, string> = {
+  // New Antioch
+  "na-lieutenant":     `${CDN}/2025/05/Lieutnenant.jpg`,
+  "na-sniper-priest":  `${CDN}/2025/05/Sniper-Priest-1.jpg`,
+  "na-trench-cleric":  `${CDN}/2025/05/Trench-Cleric.jpg`,
+  "na-combat-engineer":`${CDN}/2025/05/Combat-Engineer.jpg`,
+  "na-combat-medic":   `${CDN}/2025/05/Medic.jpg`,
+  "na-mech-heavy":     `${CDN}/2025/05/HMI-3.jpg`,
+  "na-shocktrooper":   `${CDN}/2025/05/NA-Shocktrooper.jpg`,
+  "na-yeoman":         `${CDN}/2025/05/Yeoman-3.jpg`,
+
+  // Trench Pilgrims
+  "tp-war-prophet":          `${CDN}/2025/05/War-Prophet.jpg`,
+  "tp-castigator":           `${CDN}/2025/05/Castigator.jpg`,
+  "tp-communicant":          `${CDN}/2025/05/Communicant.jpg`,
+  "tp-anchorite-shrine":     `${CDN}/2025/05/Anchorite-Shrine.jpg`,
+  "tp-ecclesiastic-prisoner":`${CDN}/2025/04/Ecclesiastic-prisoner.jpg`,
+  "tp-stigmatic-nun":        `${CDN}/2025/05/Stigmatic-Nun.jpg`,
+  "tp-trench-pilgrim":       `${CDN}/2025/04/Trench-Pilgrim.jpg`,
+
+  // Iron Sultanate
+  "is-captain":    `${CDN}/2025/05/Yuzbasi-captain.jpg`,
+  "is-alchemist":  `${CDN}/2025/07/Alchemist.jpg`,
+  "is-assassin":   `${CDN}/2025/07/Assassin-1.jpg`,
+  "is-azeb":       `${CDN}/2025/07/Azeb-Jezzail.jpg`,
+  "is-brazen-bull":`${CDN}/2025/07/Brazen-Bull-1.jpg`,
+  "is-janissary":  `${CDN}/2025/05/Janissary-Jezzail-3.jpg`,
+  "is-lion-of-jabir":`${CDN}/2025/07/Lion-of-Jabir-1.jpg`,
+  "is-sapper":     `${CDN}/2025/07/Sapper.jpg`,
+
+  // Heretic Legion
+  "hl-heretic-priest":   `${CDN}/2025/05/Heretic-Priest.jpg`,
+  "hl-death-commando":   `${CDN}/2025/05/Death-Commando.jpg`,
+  "hl-heretic-chorister":`${CDN}/2025/05/Chorister.jpg`,
+  "hl-anointed-heavy":   `${CDN}/2025/05/Anointed-Heavy-Infantry-Axe.jpg`,
+  "hl-artillery-witch":  `${CDN}/2025/05/Artillery-Witch.jpg`,
+  "hl-heretic-trooper":  `${CDN}/2025/05/Heretic-Trooper-Pistol.jpg`,
+  "hl-war-wolf":         `${CDN}/2025/05/War-Wolf.jpg`,
+  "hl-wretched":         `${CDN}/2025/05/Wretched-1.jpg`,
+
+  // Court of the Seven-Headed Serpent
+  "cs-praetor":         `${CDN}/2025/05/Court-Preator.jpg`,
+  "cs-sorcerer":        `${CDN}/2025/04/Sorcerer.jpg`,
+  "cs-hell-knight":     `${CDN}/2025/04/Hell-Knight.jpg`,
+  "cs-hunter":          `${CDN}/2025/04/Hunter-of-the-left-hand-path.jpg`,
+  "cs-desecrated-saint":`${CDN}/2025/05/Desecrated-Saint-1.jpg`,
+  "cs-pit-locust":      `${CDN}/2025/04/Pit-Locust.jpg`,
+  "cs-wretched":        `${CDN}/2025/05/Wretched-1.jpg`,
+  "cs-yoke-fiend":      `${CDN}/2025/04/Yoke-Fiend.jpg`,
+
+  // Cult of the Black Grail
+  "cbg-lord-of-tumors":       `${CDN}/2025/05/Lord-of-Tumors.jpg`,
+  "cbg-plague-knight-captain":`${CDN}/2025/05/Plague-Knight.jpg`,
+  "cbg-corpse-guard":         `${CDN}/2025/05/Corpse-Guard-3.jpg`,
+  "cbg-plague-knight-elite":  `${CDN}/2025/05/Plague-Knight.jpg`,
+  "cbg-amalgam":              `${CDN}/2025/05/Amalgam.jpg`,
+  "cbg-grail-thrall":         `${CDN}/2025/05/Grail-Thrall-2.jpg`,
+  "cbg-fly-thrall":           `${CDN}/2025/05/Grail-Thrall.jpg`,
+  "cbg-herald":               `${CDN}/2025/05/Herald-of-Beelzebub.jpg`,
+  "cbg-hounds":               `${CDN}/2025/05/Grail-Hound.jpg`,
+};

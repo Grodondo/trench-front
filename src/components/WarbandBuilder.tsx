@@ -5,6 +5,7 @@ import {
   GAME_FACTIONS,
   getFactionById,
   validateWarband,
+  UNIT_IMAGES,
   type FactionData,
   type UnitTemplate,
   type EquipmentItem,
@@ -143,7 +144,9 @@ function UnitRosterCard({
   // Determine available equipment for this unit
   const availableEq = faction.armoury.filter((eq) => {
     if (eq.eliteOnly && !unit.keywords.includes("ELITE")) return false;
-    if (eq.allowedUnitIds && !eq.allowedUnitIds.includes(unit.id)) return false;
+    if (eq.allowedUnitIds && !eq.allowedUnitIds.includes(unit.id)) {
+      if (!eq.allowedForElite || !unit.keywords.includes("ELITE")) return false;
+    }
     return true;
   });
 
@@ -158,8 +161,33 @@ function UnitRosterCard({
       ? "#9cb4cc"
       : "#e8d5b0";
 
+  const unitImageUrl = UNIT_IMAGES[unit.id];
+
   return (
-    <div className="border border-[#2e1b0e] rounded bg-[#1a0f0a] overflow-hidden">
+    <div className="border border-[#2e1b0e] rounded bg-[#1a0f0a] overflow-hidden flex">
+      {/* Unit art */}
+      <div className="shrink-0 w-16 relative overflow-hidden" style={{ minHeight: 96 }}>
+        {unitImageUrl ? (
+          <img
+            src={unitImageUrl}
+            alt={unit.name}
+            className="absolute inset-0 w-full h-full object-cover object-top"
+            style={{ filter: "brightness(0.85) contrast(1.05)" }}
+          />
+        ) : (
+          <div
+            className="absolute inset-0 flex items-center justify-center text-2xl opacity-20"
+            style={{ backgroundColor: roleColor + "18" }}
+          >
+            ⚔
+          </div>
+        )}
+        {/* subtle gradient overlay toward right */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#1a0f0a]/80" />
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
       {/* Header */}
       <div
         className="flex items-center justify-between px-3 py-2 border-b border-[#2e1b0e]"
@@ -292,6 +320,7 @@ function UnitRosterCard({
           </div>
         )}
       </div>
+      </div>{/* end content */}
     </div>
   );
 }
