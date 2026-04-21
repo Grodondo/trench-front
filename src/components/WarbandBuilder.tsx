@@ -12,6 +12,16 @@ import {
   type ValidationResult,
 } from "@/lib/gameData";
 
+export interface InitialWarbandData {
+  id: number;
+  name: string;
+  faction: string;
+  subfaction?: string | null;
+  notes?: string | null;
+  isPublic: boolean;
+  roster: RosterUnit[];
+}
+
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function FactionPicker({ onPick }: { onPick: (id: string) => void }) {
@@ -292,20 +302,23 @@ function SaveModal({
   faction,
   roster,
   validation,
+  editData,
   onClose,
   onSaved,
 }: {
   faction: FactionData;
   roster: RosterEntry[];
   validation: ValidationResult;
+  editData?: InitialWarbandData;
   onClose: () => void;
   onSaved: (id: number) => void;
 }) {
+  const isEditing = !!editData;
   const [step, setStep] = useState<"form" | "login" | "register">("form");
-  const [warbandName, setWarbandName] = useState("");
-  const [subfaction, setSubfaction] = useState("");
-  const [notes, setNotes] = useState("");
-  const [isPublic, setIsPublic] = useState(true);
+  const [warbandName, setWarbandName] = useState(editData?.name ?? "");
+  const [subfaction, setSubfaction] = useState(editData?.subfaction ?? "");
+  const [notes, setNotes] = useState(editData?.notes ?? "");
+  const [isPublic, setIsPublic] = useState(editData?.isPublic ?? true);
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
@@ -313,7 +326,8 @@ function SaveModal({
   const [regPassword, setRegPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [authed, setAuthed] = useState(false);
+  // In edit mode the user is already authenticated (owner-only page)
+  const [authed, setAuthed] = useState(isEditing);
 
   const checkAuth = useCallback(async () => {
     const res = await fetch("/api/auth/me");
@@ -321,7 +335,7 @@ function SaveModal({
     if (data.user) setAuthed(true);
   }, []);
 
-  useState(() => { checkAuth(); });
+  useState(() => { if (!isEditing) checkAuth(); });
 
   const doLogin = async () => {
     setSaving(true); setError("");
@@ -352,25 +366,35 @@ function SaveModal({
   const doSave = async () => {
     if (!warbandName.trim()) { setError("Please enter a name for your warband"); return; }
     setSaving(true); setError("");
-    const res = await fetch("/api/warbands", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: warbandName,
-        faction: faction.id,
-        subfaction: subfaction || undefined,
-        notes: notes || undefined,
-        isPublic,
-        roster: roster.map(({ _key: _k, ...r }) => r),
-      }),
-    });
+
+    const payload = {
+      name: warbandName,
+      faction: faction.id,
+      subfaction: subfaction || undefined,
+      notes: notes || undefined,
+      isPublic,
+      roster: roster.map(({ _key: _k, ...r }) => r),
+    };
+
+    const res = isEditing
+      ? await fetch(`/api/warbands/${editData!.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        })
+      : await fetch("/api/warbands", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
     const data = await res.json();
     setSaving(false);
     if (!res.ok) {
       setError(data.error + (data.details ? ": " + data.details.join(", ") : ""));
       return;
     }
-    onSaved(data.id);
+    onSaved(isEditing ? editData!.id : data.id);
   };
 
   const inputClass = "w-full bg-[#0d0805] border border-[#2e1b0e] rounded px-3 py-2 text-[#e8d5b0] text-sm focus:outline-none focus:border-[#c8a96e]/60 placeholder:text-[#4a3728]";
@@ -388,12 +412,14 @@ function SaveModal({
 
         {step === "form" && (
           <div className="p-6">
-            <h2 className="text-xl font-serif font-bold text-[#c8a96e] mb-1">Save Warband</h2>
+            <h2 className="text-xl font-serif font-bold text-[#c8a96e] mb-1">
+              {isEditing ? "Update Warband" : "Save Warband"}
+            </h2>
             <p className="text-xs text-[#e8d5b0]/40 mb-5">
               {faction.name} · {validation.totalDucats}d / {validation.totalGlory}⛭
             </p>
 
-            {!authed && (
+            {!isEditing && !authed && (
               <div className="mb-4 p-3 bg-[#2e1b0e]/50 rounded text-xs text-[#e8d5b0]/60 flex items-center justify-between">
                 <span>Sign in to save and publish your warband</span>
                 <div className="flex gap-2">
@@ -437,7 +463,7 @@ function SaveModal({
               disabled={saving}
               className={`${btnClass} mt-5 bg-[#c8a96e] text-[#0d0805] hover:bg-[#d4b87a] disabled:opacity-50`}
             >
-              {saving ? "Saving…" : authed ? "Save Warband" : "Sign In to Save"}
+              {saving ? "Saving…" : authed ? (isEditing ? "Update Warband" : "Save Warband") : "Sign In to Save"}
             </button>
           </div>
         )}
@@ -490,13 +516,24 @@ function SaveModal({
 let _keyCounter = 0;
 function newKey() { return `unit-${++_keyCounter}`; }
 
-export default function WarbandBuilder({ initialFactionId }: { initialFactionId?: string }) {
-  const [factionId, setFactionId] = useState<string | null>(initialFactionId ?? null);
-  const [roster, setRoster] = useState<RosterEntry[]>([]);
+export default function WarbandBuilder({
+  initialFactionId,
+  initialWarband,
+}: {
+  initialFactionId?: string;
+  initialWarband?: InitialWarbandData;
+}) {
+  const [factionId, setFactionId] = useState<string | null>(
+    initialWarband?.faction ?? initialFactionId ?? null
+  );
+  const [roster, setRoster] = useState<RosterEntry[]>(() =>
+    (initialWarband?.roster ?? []).map((r) => ({ ...r, _key: newKey() }))
+  );
   const [showSave, setShowSave] = useState(false);
   const [savedId, setSavedId] = useState<number | null>(null);
   const [budgetDucats] = useState(700);
   const [budgetGlory] = useState(6);
+  const editMode = !!initialWarband;
 
   const faction = factionId ? getFactionById(factionId) : null;
 
@@ -545,6 +582,11 @@ export default function WarbandBuilder({ initialFactionId }: { initialFactionId?
   }, []);
 
   const resetBuilder = useCallback(() => {
+    if (editMode) {
+      // In edit mode, reset back to the last saved state by navigating away
+      window.location.href = `/warbands/${initialWarband!.id}`;
+      return;
+    }
     setFactionId(null);
     setRoster([]);
     setSavedId(null);
@@ -559,15 +601,23 @@ export default function WarbandBuilder({ initialFactionId }: { initialFactionId?
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
         <div className="text-5xl mb-4">⚔</div>
-        <h2 className="text-2xl font-serif font-bold text-[#c8a96e] mb-2">Warband Saved!</h2>
-        <p className="text-[#e8d5b0]/50 mb-8">Your warband has been mustered and added to the rolls.</p>
+        <h2 className="text-2xl font-serif font-bold text-[#c8a96e] mb-2">
+          {editMode ? "Warband Updated!" : "Warband Saved!"}
+        </h2>
+        <p className="text-[#e8d5b0]/50 mb-8">
+          {editMode
+            ? "Your warband roster has been updated."
+            : "Your warband has been mustered and added to the rolls."}
+        </p>
         <div className="flex gap-3 justify-center">
           <a href={`/warbands/${savedId}`} className="px-6 py-2.5 bg-[#c8a96e] text-[#0d0805] rounded font-serif font-bold text-sm uppercase tracking-wider hover:bg-[#d4b87a] transition-colors">
             View Warband
           </a>
-          <button onClick={resetBuilder} className="px-6 py-2.5 bg-[#2e1b0e] text-[#e8d5b0]/70 rounded font-serif text-sm uppercase tracking-wider hover:bg-[#3a2418] transition-colors">
-            Build Another
-          </button>
+          {!editMode && (
+            <button onClick={resetBuilder} className="px-6 py-2.5 bg-[#2e1b0e] text-[#e8d5b0]/70 rounded font-serif text-sm uppercase tracking-wider hover:bg-[#3a2418] transition-colors">
+              Build Another
+            </button>
+          )}
         </div>
       </div>
     );
@@ -586,9 +636,15 @@ export default function WarbandBuilder({ initialFactionId }: { initialFactionId?
       {/* Header */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <button onClick={resetBuilder} className="text-[#4a3728] hover:text-[#c8a96e] transition-colors text-sm">
-            ← Change faction
-          </button>
+          {editMode ? (
+            <a href={`/warbands/${initialWarband!.id}`} className="text-[#4a3728] hover:text-[#c8a96e] transition-colors text-sm">
+              ← Back to warband
+            </a>
+          ) : (
+            <button onClick={resetBuilder} className="text-[#4a3728] hover:text-[#c8a96e] transition-colors text-sm">
+              ← Change faction
+            </button>
+          )}
           <div className="h-4 w-px bg-[#2e1b0e]" />
           <div>
             <h1 className="text-lg font-serif font-bold" style={{ color: faction.accentColor }}>
@@ -779,6 +835,7 @@ export default function WarbandBuilder({ initialFactionId }: { initialFactionId?
           faction={faction}
           roster={roster}
           validation={validation}
+          editData={initialWarband}
           onClose={() => setShowSave(false)}
           onSaved={(id) => { setShowSave(false); setSavedId(id); }}
         />
